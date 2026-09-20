@@ -1,0 +1,105 @@
+"""BMR / TDEE / macro calculations, following standard Indian clinical nutrition
+practice (Mifflin-St Jeor equation, activity multipliers, goal-based calorie
+adjustment). Ported and cleaned up from the original Streamlit prototype.
+"""
+
+from copy import deepcopy
+
+ACTIVITY_FACTORS = {
+    "Sedentary": 1.2,
+    "Lightly Active": 1.375,
+    "Moderately Active": 1.55,
+    "Very Active": 1.725,
+}
+
+GOAL_ADJUSTMENTS = {
+    "Weight Loss": -500,
+    "Muscle Gain": 300,
+    "Maintenance": 0,
+}
+
+MEAL_LABELS = {
+    "breakfast": "Breakfast",
+    "morning_snack": "Morning Snack",
+    "lunch": "Lunch",
+    "evening_snack": "Evening Snack",
+    "dinner": "Dinner",
+}
+
+MINIMUM_SAFE_CALORIES = 900
+
+
+def calculate_bmr(gender: str, age: int, height_cm: float, weight_kg: float) -> float:
+    if gender == "Male":
+        return (10 * weight_kg) + (6.25 * height_cm) - (5 * age) + 5
+    return (10 * weight_kg) + (6.25 * height_cm) - (5 * age) - 161
+
+
+def calculate_calorie_targets(gender: str, age: int, height_cm: float, weight_kg: float, activity: str, goal: str):
+    bmr = calculate_bmr(gender, age, height_cm, weight_kg)
+    maintenance = bmr * ACTIVITY_FACTORS[activity]
+    target = max(MINIMUM_SAFE_CALORIES, maintenance + GOAL_ADJUSTMENTS[goal])
+    return round(bmr), round(maintenance), round(target)
+
+
+def calculate_macros(target_calories: float, weight_kg: float, protein_multiplier: float, fat_multiplier: float) -> dict:
+    protein_g = round(weight_kg * protein_multiplier)
+    protein_calories = protein_g * 4
+    fat_g = round(weight_kg * fat_multiplier)
+    fat_calories = fat_g * 9
+    carb_calories = max(0, target_calories - protein_calories - fat_calories)
+    carbs_g = round(carb_calories / 4)
+
+    return {
+        "protein_multiplier": protein_multiplier,
+        "fat_multiplier": fat_multiplier,
+        "protein_g": protein_g,
+        "protein_calories": protein_calories,
+        "fat_g": fat_g,
+        "fat_calories": fat_calories,
+        "carbs_g": carbs_g,
+        "carbs_calories": carbs_g * 4,
+    }
+
+
+def scale_meal(meal_data: dict, target_calories: float) -> dict:
+    scaled_meal = deepcopy(meal_data)
+    base_calories = float(meal_data.get("base_calories", 0))
+
+    if base_calories <= 0:
+        return scaled_meal
+
+    factor = target_calories / base_calories
+    total_calories = 0
+
+    for ingredient_data in scaled_meal.get("ingredients", {}).values():
+        ingredient_data["quantity"] = round(float(ingredient_data.get("quantity", 0)) * factor)
+        ingredient_data["calories"] = round(float(ingredient_data.get("calories", 0)) * factor)
+        for choice in ingredient_data.get("choices", []):
+            choice["quantity"] = round(float(choice.get("quantity", 0)) * factor)
+            choice["calories"] = round(float(choice.get("calories", 0)) * factor)
+        total_calories += ingredient_data["calories"]
+
+    scaled_meal["target_calories"] = round(target_calories)
+    scaled_meal["total_calories"] = round(total_calories)
+    scaled_meal["scaling_factor"] = round(factor, 3)
+    return scaled_meal
+
+
+def build_scaled_plan(selected_meals: list[dict], target_calories: float) -> list[dict]:
+    """Distribute target_calories across the chosen meals, proportional to each
+    meal's base_calories weight, then scale ingredient quantities accordingly."""
+    base_total = sum(float(meal.get("base_calories", 0)) for meal in selected_meals)
+    if base_total <= 0:
+        return []
+
+    scaled_meals = []
+    for selected in selected_meals:
+        meal_target = target_calories * (float(selected["base_calories"]) / base_total)
+        scaled_meal = scale_meal(selected, meal_target)
+        scaled_meal["meal_slot"] = selected["meal_slot"]
+        scaled_meal["meal_label"] = MEAL_LABELS.get(selected["meal_slot"], selected["meal_slot"].title())
+        scaled_meal["option_key"] = selected["option_key"]
+        scaled_meals.append(scaled_meal)
+
+    return scaled_meals

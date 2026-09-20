@@ -1,0 +1,471 @@
+breakfast:
+  option_1_oats_meal:
+    meal_name: Oats Meal
+    base_calories: 350
+    ingredients:
+      oats:
+        quantity: 30
+        unit: g
+        calories: 117
+      milk:
+        quantity: 100
+        unit: ml
+        calories: 65
+      chia_seeds:
+        quantity: 10
+        unit: g
+        calories: 49
+      banana:
+        quantity: 55
+        unit: g
+        calories: 50
+      almonds:
+        quantity: 4
+        unit: pieces
+        calories: 28
+      walnut:
+        quantity: 1
+        unit: pieces
+        calories: 26
+      raisins:
+        quantity: 5
+        unit: pieces
+        calories: 10
+  option_2_moong_dal_dosa:
+    meal_name: Moong Dal Dosa + Dry Fruits
+    base_calories: 370
+    ingredients:
+      raw_moong_dal:
+        quantity: 50
+        unit: g
+        calories: 174
+      chutney:
+        quantity: 15
+        unit: g
+        calories: 60
+      almonds:
+        quantity: 4
+        unit: pieces
+        calories: 28
+      walnut:
+        quantity: 1
+        unit: pieces
+        calories: 26
+      oil_for_dosa:
+        quantity: 5
+        unit: ml
+        calories: 45
+  option_3_bread_eggs_avocado:
+    meal_name: Bread + Eggs + Avocado
+    base_calories: 360
+    ingredients:
+      whole_wheat_bread:
+        quantity: 2
+        unit: slices
+        calories: 140
+      avocado:
+        quantity: 75
+        unit: g
+        calories: 120
+      eggs:
+        quantity: 2
+        unit: pieces
+        calories: 140
+morning_snack:
+  seasonal_fruit:
+    meal_name: Seasonal Fruit
+    base_calories: 70
+    ingredients:
+      seasonal_fruit:
+        quantity: 120
+        unit: g
+        calories: 70
+lunch:
+  vegetarian_balanced_plate:
+    meal_name: Vegetarian Balanced Plate
+    base_calories: 465
+    ingredients:
+      carb_source:
+        quantity: 130
+        unit: g
+        calories: 165
+        choices:
+        - name: roti flour
+          quantity: 45
+          unit: g
+          calories: 160
+        - name: cooked rice
+          quantity: 130
+          unit: g
+          calories: 170
+        - name: ragi ball
+          quantity: 120
+          unit: g
+          calories: 140
+      vegetarian_protein:
+        quantity: 75
+        unit: g
+        calories: 120
+        choices:
+        - name: cooked channa
+          quantity: 75
+          unit: g
+          calories: 123
+        - name: cooked rajma
+          quantity: 75
+          unit: g
+          calories: 95
+        - name: cooked soya bean
+          quantity: 50
+          unit: g
+          calories: 86
+        - name: cooked chickpeas
+          quantity: 75
+          unit: g
+          calories: 123
+        - name: low fat paneer
+          quantity: 50
+          unit: g
+          calories: 80
+        - name: soya chunks
+          quantity: 30
+          unit: g
+          calories: 103
+      dal_or_greek_yogurt:
+        quantity: 100
+        unit: g
+        calories: 100
+        choices:
+        - name: cooked dal
+          quantity: 100
+          unit: g
+          calories: 100
+        - name: greek yogurt
+          quantity: 100
+          unit: g
+          calories: 80
+      veg_sabzi_or_salad:
+        quantity: 110
+        unit: g
+        calories: 80
+        choices:
+        - name: veg sabzi
+          quantity: 110
+          unit: g
+          calories: 80
+        - name: salad
+          quantity: 120
+          unit: g
+          calories: 35
+  eggetarian_balanced_plate:
+    meal_name: Eggetarian Balanced Plate
+    base_calories: 495
+    ingredients:
+      carb_source:
+        quantity: 150
+        unit: g
+        calories: 220
+        choices:
+        - name: roti flour
+          quantity: 60
+          unit: g
+          calories: 215
+        - name: cooked rice
+          quantity: 150
+          unit: g
+          calories: 195
+        - name: ragi ball
+          quantity: 150
+          unit: g
+          calories: 175
+      pulse_source:
+        quantity: 50
+        unit: g
+        calories: 80
+        choices:
+        - name: cooked channa
+          quantity: 50
+          unit: g
+          calories: 82
+        - name: cooked rajma
+          quantity: 50
+          unit: g
+          calories: 64
+        - name: cooked chickpeas
+          quantity: 50
+          unit: g
+          calories: 82
+      veg_sabzi:
+        quantity: 110
+        unit: g
+        calories: 80
+      salad:
+        quantity: 100
+        unit: g
+        calories: 25
+        choices:
+        - name: cucumber salad
+          quantity: 100
+          unit: g
+          calories: 16
+        - name: carrot salad
+          quantity: 100
+          unit: g
+          calories: 41
+        - name: mixed salad
+          quantity: 100
+          unit: g
+          calories: 25
+      eggs:
+        quantity: 2
+        unit: pieces
+        calories: 90
+        choices:
+        - name: whole egg plus egg white
+          quantity: 2
+          unit: pieces
+          calories: 90
+  non_veg_balanced_plate:
+    meal_name: Non Veg Balanced Plate
+    base_calories: 500
+    ingredients:
+      carb_source:
+        quantity: 150
+        unit: g
+        calories: 180
+        choices:
+        - name: roti flour
+          quantity: 60
+          unit: g
+          calories: 215
+        - name: cooked rice
+          quantity: 150
+          unit: g
+          calories: 195
+        - name: ragi ball
+          quantity: 150
+          unit: g
+          calories: 175
+      veg_sabzi_or_salad:
+        quantity: 100
+        unit: g
+        calories: 80
+      protein_source:
+        quantity: 100
+        unit: g
+        calories: 140
+        choices:
+        - name: chicken
+          quantity: 100
+          unit: g
+          calories: 165
+        - name: fish
+          quantity: 100
+          unit: g
+          calories: 120
+        - name: lean meat
+          quantity: 100
+          unit: g
+          calories: 180
+      dal_or_curry:
+        quantity: 120
+        unit: g
+        calories: 100
+evening_snack:
+  greek_yogurt:
+    meal_name: Greek Yogurt
+    base_calories: 80
+    ingredients:
+      greek_yogurt:
+        quantity: 80
+        unit: g
+        calories: 80
+dinner:
+  vegetarian_balanced_plate:
+    meal_name: Vegetarian Balanced Plate
+    base_calories: 475
+    ingredients:
+      low_fat_paneer:
+        quantity: 100
+        unit: g
+        calories: 160
+        choices:
+        - name: low fat paneer
+          quantity: 100
+          unit: g
+          calories: 160
+      carb_source:
+        quantity: 100
+        unit: g/ml
+        calories: 115
+        choices:
+        - name: roti flour
+          quantity: 30
+          unit: g
+          calories: 110
+        - name: cooked rice
+          quantity: 90
+          unit: g
+          calories: 117
+        - name: ragi malt
+          quantity: 150
+          unit: ml
+          calories: 110
+      cooked_sprouts:
+        quantity: 75
+        unit: g
+        calories: 75
+        choices:
+        - name: green gram sprouts
+          quantity: 75
+          unit: g
+          calories: 75
+        - name: horse gram sprouts
+          quantity: 75
+          unit: g
+          calories: 83
+      veg_salad_or_sabzi:
+        quantity: 100
+        unit: g
+        calories: 70
+        choices:
+        - name: veg sabzi
+          quantity: 110
+          unit: g
+          calories: 80
+        - name: salad
+          quantity: 120
+          unit: g
+          calories: 35
+      dal_or_curry:
+        quantity: 75
+        unit: g
+        calories: 55
+        choices:
+        - name: cooked dal
+          quantity: 100
+          unit: g
+          calories: 100
+        - name: greek yogurt
+          quantity: 100
+          unit: g
+          calories: 80
+  eggetarian_balanced_plate:
+    meal_name: Eggetarian Balanced Plate
+    base_calories: 355
+    ingredients:
+      carb_source:
+        quantity: 100
+        unit: g/ml
+        calories: 115
+        choices:
+        - name: roti flour
+          quantity: 30
+          unit: g
+          calories: 110
+        - name: cooked rice
+          quantity: 90
+          unit: g
+          calories: 117
+        - name: ragi malt
+          quantity: 150
+          unit: ml
+          calories: 110
+      cooked_sprouts:
+        quantity: 100
+        unit: g
+        calories: 100
+      veg_salad_or_sabzi:
+        quantity: 100
+        unit: g
+        calories: 70
+        choices:
+        - name: veg sabzi
+          quantity: 110
+          unit: g
+          calories: 80
+        - name: salad
+          quantity: 120
+          unit: g
+          calories: 35
+      egg:
+        quantity: 1
+        unit: piece
+        calories: 70
+        choices:
+        - name: whole egg
+          quantity: 1
+          unit: piece
+          calories: 70
+  non_veg_balanced_plate:
+    meal_name: Non Veg Balanced Plate
+    base_calories: 350
+    ingredients:
+      carb_source:
+        quantity: 100
+        unit: g/ml
+        calories: 100
+        choices:
+        - name: roti flour
+          quantity: 30
+          unit: g
+          calories: 110
+        - name: cooked rice
+          quantity: 90
+          unit: g
+          calories: 117
+        - name: ragi malt
+          quantity: 150
+          unit: ml
+          calories: 110
+      veg_sabzi_or_salad:
+        quantity: 100
+        unit: g
+        calories: 70
+        choices:
+        - name: veg sabzi
+          quantity: 110
+          unit: g
+          calories: 80
+        - name: salad
+          quantity: 120
+          unit: g
+          calories: 35
+      protein_source:
+        quantity: 75
+        unit: g
+        calories: 90
+        choices:
+        - name: egg whites
+          quantity: 2
+          unit: pieces
+          calories: 34
+        - name: chicken
+          quantity: 50
+          unit: g
+          calories: 83
+        - name: low fat paneer
+          quantity: 50
+          unit: g
+          calories: 80
+        - name: tofu
+          quantity: 100
+          unit: g
+          calories: 76
+        - name: soya chunks
+          quantity: 25
+          unit: g
+          calories: 86
+      dal_or_curry:
+        quantity: 100
+        unit: g
+        calories: 90
+        choices:
+        - name: cooked dal
+          quantity: 100
+          unit: g
+          calories: 100
+        - name: greek yogurt
+          quantity: 100
+          unit: g
+          calories: 80

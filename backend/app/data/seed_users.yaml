@@ -1,0 +1,13 @@
+# User store for the Diet Planner app.
+# Passwords are bcrypt hashes — never store plaintext here.
+# Change these default passwords after first login.
+users:
+  - username: admin
+    display_name: Admin Nutritionist
+    role: admin
+    password_hash: "$2b$12$GJx1VzlCFZMEnCUvW2jrh.Psn8V0ICiJ75uYgyFzN/Y5l9hXqbQVm"
+
+  - username: client
+    display_name: Demo Client
+    role: viewer
+    password_hash: "$2b$12$6xZXf8nUKX/mDLcks4Y4.uX3BQyJio21CObPTFN12mX/oNZvSyOgq"
