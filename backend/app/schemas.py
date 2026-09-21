@@ -51,6 +51,18 @@ class GeneratePlanRequest(BaseModel):
     selections: list[MealSelection] = Field(default_factory=list)
 
 
+class PlanExportRequest(BaseModel):
+    """Exports render exactly this plan object — the same shape /generate
+    returns — rather than recomputing from client+selections. This keeps the
+    exported document in sync with any display-only pruning the frontend did
+    (e.g. hiding some ingredient substitution choices) after generating."""
+
+    client: dict
+    nutrition: dict
+    meals: list[dict]
+    guidelines: list[dict] = Field(default_factory=list)
+
+
 class IngredientChoice(BaseModel):
     name: str
     quantity: float

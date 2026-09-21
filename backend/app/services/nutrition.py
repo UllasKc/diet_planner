@@ -84,7 +84,8 @@ def scale_meal(meal_data: dict, target_calories: float) -> dict:
     scalable_target = max(0.0, target_calories - fixed_base_calories)
     factor = (scalable_target / scalable_base) if scalable_base > 0 else 1.0
 
-    total_calories = 0
+    total_calories = 0.0
+    scalable_items = []
     for ingredient_data in ingredients.values():
         if ingredient_data.get("is_fixed"):
             total_calories += float(ingredient_data.get("calories", 0))
@@ -96,8 +97,20 @@ def scale_meal(meal_data: dict, target_calories: float) -> dict:
             choice["quantity"] = round(float(choice.get("quantity", 0)) * factor)
             choice["calories"] = round(float(choice.get("calories", 0)) * factor)
         total_calories += ingredient_data["calories"]
+        scalable_items.append(ingredient_data)
 
-    scaled_meal["target_calories"] = round(target_calories)
+    # Rounding each ingredient individually drifts the meal's total away from
+    # its target (worse with more ingredients) — nudge the largest scalable
+    # ingredient by the leftover so the displayed total always matches the
+    # target exactly, the way a nutritionist reading the numbers expects.
+    target_total = round(target_calories)
+    residual = target_total - round(total_calories)
+    if residual != 0 and scalable_items:
+        largest = max(scalable_items, key=lambda ing: ing["calories"])
+        largest["calories"] = max(0, largest["calories"] + residual)
+        total_calories += residual
+
+    scaled_meal["target_calories"] = target_total
     scaled_meal["total_calories"] = round(total_calories)
     scaled_meal["scaling_factor"] = round(factor, 3)
     return scaled_meal

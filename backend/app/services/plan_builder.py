@@ -33,6 +33,29 @@ def list_meal_options(food_preference: str | None = None) -> dict[str, list[dict
     return result
 
 
+def list_meal_options_full() -> dict[str, list[dict]]:
+    """Return every meal option with full ingredient/choice detail, for the
+    admin-only meal library view. Unlike list_meal_options(), not filtered
+    by preference and not summarized."""
+    result: dict[str, list[dict]] = {}
+
+    with get_session() as session:
+        records = session.query(MealOptionRecord).order_by(MealOptionRecord.meal_slot, MealOptionRecord.meal_name).all()
+        for record in records:
+            result.setdefault(record.meal_slot, []).append(
+                {
+                    "option_key": record.option_key,
+                    "meal_name": record.meal_name,
+                    "base_calories": record.base_calories,
+                    "food_type": record.food_type,
+                    "preference": record.preference,
+                    "ingredients": record.ingredients,
+                }
+            )
+
+    return result
+
+
 def get_meal_option(meal_slot: str, option_key: str) -> dict | None:
     with get_session() as session:
         record = (

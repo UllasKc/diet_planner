@@ -40,6 +40,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -48,6 +52,7 @@ body {
     radial-gradient(circle at 95% 15%, rgba(245, 158, 11, 0.07), transparent 40%);
   background-attachment: fixed;
   color: var(--color-text);
+  overflow-x: hidden;
 }
 
 h1,
@@ -61,6 +66,8 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
   padding: 14px 28px;
   background: var(--gradient-primary);
   box-shadow: 0 2px 16px rgba(15, 92, 63, 0.25);
@@ -90,6 +97,13 @@ h3 {
   background: rgba(255, 255, 255, 0.12);
   padding: 4px;
   border-radius: 999px;
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+
+.navbar-links::-webkit-scrollbar {
+  display: none;
 }
 
 .navbar-links a {
@@ -99,6 +113,7 @@ h3 {
   font-size: 0.88rem;
   padding: 8px 16px;
   border-radius: 999px;
+  white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -618,6 +633,50 @@ textarea:focus {
   white-space: nowrap;
 }
 
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.choice-line {
+  font-size: 0.85rem;
+}
+
+.choice-line-pickable {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 0.12s ease;
+}
+
+.choice-line-pickable:hover {
+  background: var(--color-bg-alt);
+}
+
+.choice-line-pickable input {
+  width: auto;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.choice-line-selected {
+  background: var(--color-primary-light);
+}
+
+.choice-hint {
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.choice-option-label {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
 .guideline-section {
   margin-bottom: 16px;
   background: var(--color-bg-alt);
@@ -643,6 +702,80 @@ textarea:focus {
 .guideline-section li {
   margin-bottom: 3px;
   font-size: 0.9rem;
+}
+
+/* Meal library page */
+.library-slot-section {
+  margin-top: 28px;
+}
+
+.library-slot-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--color-primary-light);
+}
+
+.library-plate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.library-plate-card {
+  padding: 18px;
+}
+
+.library-plate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.library-plate-name {
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: #12261c;
+}
+
+.library-plate-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.library-ingredient-block {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.library-ingredient-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.library-choice-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+}
+
+.library-choice-list li {
+  margin-bottom: 2px;
 }
 
 /* Build plan page */
@@ -684,17 +817,39 @@ textarea:focus {
   accent-color: var(--color-accent-dark);
 }
 
+.ingredient-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ingredient-field-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .ingredient-name {
-  flex: 2;
   min-width: 160px;
 }
 
-.ingredient-qty {
-  flex: 0 0 80px;
+.ingredient-field:has(.ingredient-name) {
+  flex: 2;
 }
 
-.ingredient-unit {
-  flex: 0 0 70px;
+.ingredient-qty {
+  width: 80px;
+}
+
+.ingredient-unit-select {
+  width: 100px;
+}
+
+.ingredient-unit-custom {
+  width: 100px;
+  margin-top: 4px;
 }
 
 .ingredient-macros {
@@ -734,4 +889,150 @@ textarea:focus {
 
 .existing-option-row:hover {
   background: var(--color-bg-alt);
+}
+
+.existing-option-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Slot-based ingredient builder */
+.slot-card {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 14px;
+  background: #fcfefc;
+}
+
+.slot-header {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px dashed var(--color-border);
+}
+
+.slot-name-field {
+  flex: 1;
+  min-width: 160px;
+}
+
+.slot-name-field input {
+  font-weight: 700;
+  font-size: 1rem;
+  border-color: var(--color-primary);
+}
+
+.slot-add-option {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.option-index-badge {
+  flex-basis: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .navbar {
+    padding: 10px 14px;
+  }
+
+  .navbar-brand {
+    font-size: 1.05rem;
+  }
+
+  .navbar-user span {
+    display: none;
+  }
+
+  .page {
+    padding: 20px 16px 44px;
+  }
+
+  .page h1 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 18px 16px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .stat-row {
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 110px;
+  }
+
+  .auth-card {
+    padding: 30px 22px;
+  }
+
+  .auth-shell::before,
+  .auth-shell::after {
+    font-size: 12rem;
+  }
+
+  .ingredient-macros {
+    flex-wrap: wrap;
+  }
+
+  .macro-input {
+    flex: 1 1 calc(33.33% - 7px);
+    min-width: 70px;
+  }
+
+  .existing-option-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .library-plate-header {
+    flex-wrap: wrap;
+  }
+
+  .library-plate-meta {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .export-row {
+    flex-wrap: wrap;
+  }
+
+  .export-row .btn {
+    flex: 1 1 140px;
+  }
+
+  .slot-header .btn-ghost,
+  .slot-header .fixed-toggle {
+    flex: 0 0 auto;
+  }
+
+  .ingredient-row {
+    padding: 12px;
+  }
+
+  .ingredient-row > .btn,
+  .ingredient-row > .fixed-toggle {
+    flex: 1 1 auto;
+  }
 }

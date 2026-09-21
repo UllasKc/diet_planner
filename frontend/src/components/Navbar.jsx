@@ -28,6 +28,11 @@ export default function Navbar() {
             Build Diet Plans
           </NavLink>
         )}
+        {isAdmin && (
+          <NavLink to="/library" className={({ isActive }) => (isActive ? "active" : "")}>
+            Meal Library
+          </NavLink>
+        )}
       </nav>
       <div className="navbar-user">
         <span>{displayName}</span>

@@ -19,6 +19,11 @@ def all_meal_options(current_user: CurrentUser = Depends(require_admin)):
     return plan_builder.list_meal_options()
 
 
+@router.get("/meal-options/full")
+def all_meal_options_full(current_user: CurrentUser = Depends(require_admin)):
+    return plan_builder.list_meal_options_full()
+
+
 @router.get("/meal-options/{meal_slot}/{option_key}")
 def get_meal_option(meal_slot: str, option_key: str, current_user: CurrentUser = Depends(require_admin)):
     meal = plan_builder.get_meal_option(meal_slot, option_key)

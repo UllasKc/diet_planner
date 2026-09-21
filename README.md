@@ -4,6 +4,9 @@ A professional diet planning app for Indian clinical nutrition practice. Built f
 generating personalised, calorie-scaled meal plans and for growing a reusable meal
 database over time.
 
+> Just want to run this on your own machine (no Supabase/Render account needed)?
+> See [RUNNING.md](RUNNING.md) — zero-dependency local setup with SQLite.
+
 ## Stack
 
 - **Backend**: FastAPI (Python), JWT auth, Postgres via SQLAlchemy, NVIDIA NIM

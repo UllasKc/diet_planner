@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from app.deps import get_current_user
-from app.schemas import CurrentUser, GeneratePlanRequest
+from app.schemas import CurrentUser, GeneratePlanRequest, PlanExportRequest
 from app.services import plan_builder
 from app.services.export import build_docx, build_pdf
 from app.services.nutrition import build_scaled_plan, calculate_calorie_targets, calculate_macros
@@ -56,10 +56,10 @@ def generate_plan(payload: GeneratePlanRequest, current_user: CurrentUser = Depe
 
 
 @router.post("/export/docx")
-def export_docx(payload: GeneratePlanRequest, current_user: CurrentUser = Depends(get_current_user)):
-    plan = _compute_plan(payload)
+def export_docx(payload: PlanExportRequest, current_user: CurrentUser = Depends(get_current_user)):
+    plan = payload.model_dump()
     buffer = build_docx(plan)
-    filename = f"diet-plan-{plan['client']['name'].replace(' ', '_') or 'client'}.docx"
+    filename = f"diet-plan-{(plan['client'].get('name') or 'client').replace(' ', '_')}.docx"
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -68,10 +68,10 @@ def export_docx(payload: GeneratePlanRequest, current_user: CurrentUser = Depend
 
 
 @router.post("/export/pdf")
-def export_pdf(payload: GeneratePlanRequest, current_user: CurrentUser = Depends(get_current_user)):
-    plan = _compute_plan(payload)
+def export_pdf(payload: PlanExportRequest, current_user: CurrentUser = Depends(get_current_user)):
+    plan = payload.model_dump()
     buffer = build_pdf(plan)
-    filename = f"diet-plan-{plan['client']['name'].replace(' ', '_') or 'client'}.pdf"
+    filename = f"diet-plan-{(plan['client'].get('name') or 'client').replace(' ', '_')}.pdf"
     return StreamingResponse(
         buffer,
         media_type="application/pdf",

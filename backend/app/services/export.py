@@ -48,26 +48,35 @@ def _slug_to_label(value: str) -> str:
     return str(value).replace("_", " ").replace("-", " ").title()
 
 
-def _ingredient_rows(meal: dict) -> list[tuple[str, str, str, bool]]:
-    """Returns (food, quantity_or_choices, calories, is_fixed) tuples."""
+def _ingredient_rows(meal: dict) -> list[dict]:
+    """Returns one dict per ingredient: {food, option_lines, quantity, calories, is_fixed}.
+
+    `option_lines` is a list of "Option N: ..." strings when the ingredient
+    has substitutable choices (pick one), or None for a plain fixed-quantity
+    ingredient (in which case `quantity`/`calories` are set instead).
+    """
     rows = []
     for key, ingredient in meal.get("ingredients", {}).items():
         choices = ingredient.get("choices") or []
         is_fixed = bool(ingredient.get("is_fixed"))
         if choices:
-            option_text = " | ".join(
-                f"{_slug_to_label(c.get('name', 'Choice'))}: {c.get('quantity', 0)}{c.get('unit', ingredient.get('unit', ''))} ({c.get('calories', 0)} kcal)"
-                for c in choices
+            option_lines = [
+                f"Option {idx + 1}: {_slug_to_label(c.get('name', 'Choice'))} — "
+                f"{c.get('quantity', 0)}{c.get('unit', ingredient.get('unit', ''))} ({c.get('calories', 0)} kcal)"
+                for idx, c in enumerate(choices)
+            ]
+            rows.append(
+                {"food": _slug_to_label(key), "option_lines": option_lines, "quantity": "", "calories": "", "is_fixed": is_fixed}
             )
-            rows.append((_slug_to_label(key), option_text, "", is_fixed))
         else:
             rows.append(
-                (
-                    _slug_to_label(key),
-                    f"{ingredient.get('quantity', 0)} {ingredient.get('unit', '')}".strip(),
-                    f"{ingredient.get('calories', 0)} kcal",
-                    is_fixed,
-                )
+                {
+                    "food": _slug_to_label(key),
+                    "option_lines": None,
+                    "quantity": f"{ingredient.get('quantity', 0)} {ingredient.get('unit', '')}".strip(),
+                    "calories": f"{ingredient.get('calories', 0)} kcal",
+                    "is_fixed": is_fixed,
+                }
             )
     return rows
 
@@ -91,6 +100,15 @@ def _shade_cell(cell, hex_color: str) -> None:
 
 def _shade_paragraph(paragraph, hex_color: str) -> None:
     _shade(paragraph._p.get_or_add_pPr(), hex_color)
+
+
+def _write_lines(cell, lines: list[str]) -> None:
+    """Writes each string as its own paragraph within a table cell."""
+    cell.text = ""
+    for idx, line in enumerate(lines):
+        paragraph = cell.paragraphs[0] if idx == 0 else cell.add_paragraph()
+        run = paragraph.add_run(line)
+        run.font.size = Pt(9.5)
 
 
 def _bar_paragraph(document, text: str, bg: str, fg: str, size: int, space_before: int, space_after: int):
@@ -231,12 +249,16 @@ def build_docx(plan: dict) -> BytesIO:
             table.rows[0].cells[0].text = "Food"
             table.rows[0].cells[1].text = "Quantity / Choices"
             table.rows[0].cells[2].text = "Calories"
-            for r_idx, (food, qty, kcal, is_fixed) in enumerate(rows, start=1):
+            for r_idx, row in enumerate(rows, start=1):
                 cells = table.rows[r_idx].cells
-                cells[0].text = food + ("  [FIXED]" if is_fixed else "")
-                cells[1].text = qty
-                cells[2].text = kcal
-                if is_fixed:
+                cells[0].text = row["food"] + ("  [FIXED]" if row["is_fixed"] else "")
+                if row["option_lines"]:
+                    _write_lines(cells[1], row["option_lines"])
+                    cells[2].text = ""
+                else:
+                    cells[1].text = row["quantity"]
+                    cells[2].text = row["calories"]
+                if row["is_fixed"]:
                     for run in cells[0].paragraphs[0].runs:
                         run.font.color.rgb = _rgb(AMBER_DARK)
                 if r_idx % 2 == 0:
@@ -341,6 +363,7 @@ def build_pdf(plan: dict) -> BytesIO:
     body_style = ParagraphStyle("body", parent=styles["BodyText"], fontSize=8.5, leading=11, textColor=colors.HexColor(f"#{INK}"))
     bold_body = ParagraphStyle("bodyBold", parent=body_style, fontName="Helvetica-Bold")
     fixed_body = ParagraphStyle("bodyFixed", parent=body_style, fontName="Helvetica-Bold", textColor=colors.HexColor(f"#{AMBER_DARK}"))
+    option_style = ParagraphStyle("optionLines", parent=body_style, leading=13, spaceBefore=1, spaceAfter=1)
     meal_title_style = ParagraphStyle("mealTitle", fontName="Helvetica-Bold", fontSize=12, textColor=colors.HexColor(f"#{GREEN_DARK}"), spaceBefore=8, spaceAfter=4)
     section_title_style = ParagraphStyle("sectionTitle", fontName="Helvetica-Bold", fontSize=11, textColor=colors.HexColor(f"#{GREEN_DARK}"), spaceBefore=8, spaceAfter=2)
     bullet_style = ParagraphStyle("bullet", parent=body_style, leftIndent=10, spaceAfter=2)
@@ -421,10 +444,16 @@ def build_pdf(plan: dict) -> BytesIO:
         if rows:
             table_data = [["Food", "Quantity / Choices", "Calories"]]
             row_styles = []
-            for row_idx, (food, qty, kcal, is_fixed) in enumerate(rows, start=1):
-                style = fixed_body if is_fixed else body_style
-                food_text = food + (" [FIXED]" if is_fixed else "")
-                table_data.append([Paragraph(food_text, style), Paragraph(qty, body_style), Paragraph(kcal, body_style)])
+            for row_idx, row in enumerate(rows, start=1):
+                style = fixed_body if row["is_fixed"] else body_style
+                food_text = row["food"] + (" [FIXED]" if row["is_fixed"] else "")
+                if row["option_lines"]:
+                    options_cell = Paragraph("<br/>".join(row["option_lines"]), option_style)
+                    table_data.append([Paragraph(food_text, style), options_cell, ""])
+                else:
+                    table_data.append(
+                        [Paragraph(food_text, style), Paragraph(row["quantity"], body_style), Paragraph(row["calories"], body_style)]
+                    )
                 if row_idx % 2 == 0:
                     row_styles.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.HexColor("#F7FBF9")))
             table = Table(table_data, colWidths=[content_width * 0.22, content_width * 0.62, content_width * 0.16])

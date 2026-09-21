@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import GeneratePlanPage from "./pages/GeneratePlanPage";
 import BuildPlanPage from "./pages/BuildPlanPage";
+import MealLibraryPage from "./pages/MealLibraryPage";
 
 export default function App() {
   return (
@@ -26,6 +27,14 @@ export default function App() {
             element={
               <ProtectedRoute adminOnly>
                 <BuildPlanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/library"
+            element={
+              <ProtectedRoute adminOnly>
+                <MealLibraryPage />
               </ProtectedRoute>
             }
           />

@@ -7,6 +7,22 @@ const ACTIVITY_OPTIONS = ["Sedentary", "Lightly Active", "Moderately Active", "V
 const GOAL_OPTIONS = ["Weight Loss", "Maintenance", "Muscle Gain"];
 const PREFERENCE_OPTIONS = ["Vegetarian", "Eggetarian", "Non-Vegetarian"];
 
+function choiceKey(meal, ingredientKey) {
+  return `${meal.meal_slot}|${meal.option_key}|${ingredientKey}`;
+}
+
+function defaultChoiceSelections(plan) {
+  const defaults = {};
+  for (const meal of plan.meals) {
+    for (const [ingKey, ing] of Object.entries(meal.ingredients || {})) {
+      if (ing.choices && ing.choices.length > 0) {
+        defaults[choiceKey(meal, ingKey)] = ing.choices.map((_, idx) => idx).slice(0, 3);
+      }
+    }
+  }
+  return defaults;
+}
+
 const initialClient = {
   name: "",
   gender: "Female",
@@ -27,6 +43,7 @@ export default function GeneratePlanPage() {
   const [mealOptions, setMealOptions] = useState({});
   const [selections, setSelections] = useState({});
   const [plan, setPlan] = useState(null);
+  const [choiceSelections, setChoiceSelections] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState("");
@@ -57,9 +74,13 @@ export default function GeneratePlanPage() {
   function pruneSelections(prevSelections, availableOptions) {
     const next = {};
     for (const slot of Object.keys(availableOptions)) {
-      const availableKeys = new Set(availableOptions[slot].map((o) => o.option_key));
+      const options = availableOptions[slot];
+      const availableKeys = new Set(options.map((o) => o.option_key));
       const kept = (prevSelections[slot] || []).filter((key) => availableKeys.has(key));
-      next[slot] = kept;
+      // Default to the first option when nothing valid is selected yet (first load,
+      // or a preference change invalidated the previous pick) — the nutritionist can
+      // still untick it or add more; this just avoids starting from a blank slate.
+      next[slot] = kept.length > 0 ? kept : options.length > 0 ? [options[0].option_key] : [];
     }
     return next;
   }
@@ -110,6 +131,7 @@ export default function GeneratePlanPage() {
         body: { client, selections: selectionPayload },
       });
       setPlan(data);
+      setChoiceSelections(defaultChoiceSelections(data));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to generate plan");
     } finally {
@@ -117,14 +139,48 @@ export default function GeneratePlanPage() {
     }
   }
 
+  function toggleChoice(meal, ingredientKey, idx) {
+    const key = choiceKey(meal, ingredientKey);
+    setChoiceSelections((prev) => {
+      const current = prev[key] || [];
+      const next = current.includes(idx) ? current.filter((i) => i !== idx) : [...current, idx].sort((a, b) => a - b);
+      return { ...prev, [key]: next };
+    });
+  }
+
+  function buildDisplayPlan() {
+    if (!plan) return null;
+    return {
+      ...plan,
+      meals: plan.meals.map((meal) => ({
+        ...meal,
+        ingredients: Object.fromEntries(
+          Object.entries(meal.ingredients || {}).map(([ingKey, ing]) => {
+            if (!ing.choices || ing.choices.length === 0) return [ingKey, ing];
+            const key = choiceKey(meal, ingKey);
+            const selectedIdx = choiceSelections[key] || [];
+            return [ingKey, { ...ing, choices: selectedIdx.map((i) => ing.choices[i]) }];
+          })
+        ),
+      })),
+    };
+  }
+
   async function handleExport(format) {
+    const displayPlan = buildDisplayPlan();
+    if (!displayPlan) return;
     setExporting(format);
     setError("");
     try {
       const blob = await requestBlob(`/api/plans/export/${format}`, {
         method: "POST",
         token,
-        body: { client, selections: selectionPayload },
+        body: {
+          client: displayPlan.client,
+          nutrition: displayPlan.nutrition,
+          meals: displayPlan.meals,
+          guidelines: displayPlan.guidelines,
+        },
       });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -290,14 +346,22 @@ export default function GeneratePlanPage() {
         <div className="card">
           <h2>📋 Result</h2>
           {!plan && <p className="hint">Fill in the client details and generate a plan to see it here.</p>}
-          {plan && <PlanResult plan={plan} onExport={handleExport} exporting={exporting} />}
+          {plan && (
+            <PlanResult
+              plan={plan}
+              onExport={handleExport}
+              exporting={exporting}
+              choiceSelections={choiceSelections}
+              onToggleChoice={toggleChoice}
+            />
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function PlanResult({ plan, onExport, exporting }) {
+function PlanResult({ plan, onExport, exporting, choiceSelections, onToggleChoice }) {
   const { nutrition, meals, guidelines } = plan;
 
   let lastSlot = null;
@@ -352,17 +416,38 @@ function PlanResult({ plan, onExport, exporting }) {
                         )}
                       </td>
                       <td>
-                        {ingredient.choices && ingredient.choices.length > 0
-                          ? ingredient.choices
-                              .map((c) => `${slugToLabel(c.name)}: ${c.quantity}${c.unit} (${c.calories} kcal)`)
-                              .join(" | ")
-                          : `${ingredient.quantity} ${ingredient.unit}`}
+                        {ingredient.choices && ingredient.choices.length > 0 ? (
+                          <div className="choice-list">
+                            {ingredient.choices.map((c, idx) => {
+                              const selected = (choiceSelections[choiceKey(meal, key)] || []).includes(idx);
+                              return (
+                                <label className={`choice-line choice-line-pickable${selected ? " choice-line-selected" : ""}`} key={idx}>
+                                  <input
+                                    type="checkbox"
+                                    checked={selected}
+                                    onChange={() => onToggleChoice(meal, key, idx)}
+                                  />
+                                  <span className="choice-option-label">Option {idx + 1}:</span> {slugToLabel(c.name)} —{" "}
+                                  {c.quantity}
+                                  {c.unit} ({c.calories} kcal)
+                                </label>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          `${ingredient.quantity} ${ingredient.unit}`
+                        )}
                       </td>
                       <td>{ingredient.choices?.length ? "" : `${ingredient.calories} kcal`}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {Object.entries(meal.ingredients || {}).some(([, ing]) => ing.choices && ing.choices.length > 3) && (
+                <p className="hint choice-hint">
+                  Tick which alternatives to offer this client for each item above — the first 3 are ticked by default.
+                </p>
+              )}
             </div>
           </div>
         );
