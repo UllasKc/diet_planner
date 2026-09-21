@@ -656,6 +656,32 @@ textarea:focus {
   gap: 8px;
   align-items: center;
   background: #fbfdfb;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ingredient-row-fixed {
+  border-color: #fde3ae;
+  background: var(--color-accent-light);
+}
+
+.fixed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-accent-dark);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.fixed-toggle input {
+  width: auto;
+  accent-color: var(--color-accent-dark);
 }
 
 .ingredient-name {

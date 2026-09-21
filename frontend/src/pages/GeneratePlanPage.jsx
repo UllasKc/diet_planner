@@ -342,7 +342,15 @@ function PlanResult({ plan, onExport, exporting }) {
                 <tbody>
                   {Object.entries(meal.ingredients || {}).map(([key, ingredient]) => (
                     <tr key={key}>
-                      <td>{slugToLabel(key)}</td>
+                      <td>
+                        {slugToLabel(key)}
+                        {ingredient.is_fixed && (
+                          <span className="hint" title="Fixed quantity — does not scale">
+                            {" "}
+                            🔒
+                          </span>
+                        )}
+                      </td>
                       <td>
                         {ingredient.choices && ingredient.choices.length > 0
                           ? ingredient.choices

@@ -14,6 +14,7 @@ function blankIngredient() {
     carbs: 0,
     fat: 0,
     fiber: 0,
+    is_fixed: false,
     looking: false,
   };
 }
@@ -144,6 +145,7 @@ export default function BuildPlanPage() {
         carbs: Number(ing.carbs) || 0,
         fat: Number(ing.fat) || 0,
         fiber: Number(ing.fiber) || 0,
+        is_fixed: Boolean(ing.is_fixed),
         choices: [],
       };
     }
@@ -237,8 +239,13 @@ export default function BuildPlanPage() {
           />
 
           <h3>Ingredients</h3>
+          <p className="hint" style={{ marginTop: -6, marginBottom: 10 }}>
+            Unit isn't limited to grams — use "pieces" for count-based foods like eggs (e.g. 2 pieces).
+            Mark an ingredient <strong>Fixed</strong> to keep its quantity constant (e.g. always 2 eggs) —
+            the rest of the meal scales around it to still hit the target calories.
+          </p>
           {form.ingredients.map((ingredient) => (
-            <div key={ingredient.id} className="ingredient-row">
+            <div key={ingredient.id} className={`ingredient-row${ingredient.is_fixed ? " ingredient-row-fixed" : ""}`}>
               <input
                 className="ingredient-name"
                 placeholder="Food name (e.g. paneer)"
@@ -253,6 +260,8 @@ export default function BuildPlanPage() {
               />
               <input
                 className="ingredient-unit"
+                list="unit-options"
+                placeholder="g / ml / pieces"
                 value={ingredient.unit}
                 onChange={(e) => updateIngredient(ingredient.id, "unit", e.target.value)}
               />
@@ -264,6 +273,14 @@ export default function BuildPlanPage() {
               >
                 {ingredient.looking ? "Looking..." : "🤖 NVIDIA Lookup"}
               </button>
+              <label className="fixed-toggle" title="Keep this ingredient's quantity constant when scaling the meal">
+                <input
+                  type="checkbox"
+                  checked={ingredient.is_fixed}
+                  onChange={(e) => updateIngredient(ingredient.id, "is_fixed", e.target.checked)}
+                />
+                🔒 Fixed
+              </label>
               <button type="button" className="btn btn-ghost btn-danger" onClick={() => removeIngredient(ingredient.id)}>
                 Remove
               </button>
@@ -277,6 +294,15 @@ export default function BuildPlanPage() {
               </div>
             </div>
           ))}
+          <datalist id="unit-options">
+            <option value="g" />
+            <option value="ml" />
+            <option value="pieces" />
+            <option value="tbsp" />
+            <option value="tsp" />
+            <option value="cup" />
+            <option value="slices" />
+          </datalist>
 
           <button type="button" className="btn btn-secondary" onClick={addIngredient}>
             ➕ Add Ingredient

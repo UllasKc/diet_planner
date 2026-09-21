@@ -70,6 +70,7 @@ class Ingredient(BaseModel):
     carbs: float = 0
     fat: float = 0
     fiber: float = 0
+    is_fixed: bool = False
     choices: list[IngredientChoice] = Field(default_factory=list)
 
 

@@ -63,16 +63,33 @@ def calculate_macros(target_calories: float, weight_kg: float, protein_multiplie
 
 
 def scale_meal(meal_data: dict, target_calories: float) -> dict:
+    """Scale ingredient quantities so the meal hits target_calories.
+
+    Ingredients flagged `is_fixed` (e.g. "2 eggs") keep their original
+    quantity/calories untouched — the scaling factor is computed only over
+    the remaining (non-fixed) ingredients, so they absorb the difference and
+    the meal still lands on target_calories overall.
+    """
     scaled_meal = deepcopy(meal_data)
     base_calories = float(meal_data.get("base_calories", 0))
 
     if base_calories <= 0:
         return scaled_meal
 
-    factor = target_calories / base_calories
-    total_calories = 0
+    ingredients = scaled_meal.get("ingredients", {})
+    fixed_base_calories = sum(
+        float(ingredient.get("calories", 0)) for ingredient in ingredients.values() if ingredient.get("is_fixed")
+    )
+    scalable_base = base_calories - fixed_base_calories
+    scalable_target = max(0.0, target_calories - fixed_base_calories)
+    factor = (scalable_target / scalable_base) if scalable_base > 0 else 1.0
 
-    for ingredient_data in scaled_meal.get("ingredients", {}).values():
+    total_calories = 0
+    for ingredient_data in ingredients.values():
+        if ingredient_data.get("is_fixed"):
+            total_calories += float(ingredient_data.get("calories", 0))
+            continue
+
         ingredient_data["quantity"] = round(float(ingredient_data.get("quantity", 0)) * factor)
         ingredient_data["calories"] = round(float(ingredient_data.get("calories", 0)) * factor)
         for choice in ingredient_data.get("choices", []):
