@@ -94,6 +94,14 @@ export default function GeneratePlanPage() {
     setClient((prev) => ({ ...prev, [field]: value }));
   }
 
+  // Keep the field blank while the user is clearing/typing rather than
+  // snapping to 0 — forcing 0 the instant the field empties plants a
+  // leading "0" that the next digits get typed after (e.g. typing "28"
+  // becomes "028"), since the cursor lands after that zero.
+  function updateClientNumberField(field, rawValue) {
+    updateClientField(field, rawValue === "" ? "" : Number(rawValue));
+  }
+
   function toggleSelection(slot, optionKey) {
     setSelections((prev) => {
       const current = prev[slot] || [];
@@ -122,6 +130,12 @@ export default function GeneratePlanPage() {
     event.preventDefault();
     setError("");
     setPlan(null);
+
+    const numericFields = ["age", "height_cm", "weight_kg", "protein_multiplier", "fat_multiplier"];
+    if (numericFields.some((field) => client[field] === "")) {
+      setError("Fill in age, height, weight, and the protein/fat targets before generating a plan.");
+      return;
+    }
 
     if (selectionPayload.length === 0) {
       setError("Select at least one meal option before generating a plan.");
@@ -232,7 +246,7 @@ export default function GeneratePlanPage() {
                 min="10"
                 max="100"
                 value={client.age}
-                onChange={(e) => updateClientField("age", Number(e.target.value))}
+                onChange={(e) => updateClientNumberField("age", e.target.value)}
               />
             </div>
           </div>
@@ -243,7 +257,7 @@ export default function GeneratePlanPage() {
               <input
                 type="number"
                 value={client.height_cm}
-                onChange={(e) => updateClientField("height_cm", Number(e.target.value))}
+                onChange={(e) => updateClientNumberField("height_cm", e.target.value)}
               />
             </div>
             <div>
@@ -251,7 +265,7 @@ export default function GeneratePlanPage() {
               <input
                 type="number"
                 value={client.weight_kg}
-                onChange={(e) => updateClientField("weight_kg", Number(e.target.value))}
+                onChange={(e) => updateClientNumberField("weight_kg", e.target.value)}
               />
             </div>
           </div>
@@ -293,7 +307,7 @@ export default function GeneratePlanPage() {
                 type="number"
                 step="0.1"
                 value={client.protein_multiplier}
-                onChange={(e) => updateClientField("protein_multiplier", Number(e.target.value))}
+                onChange={(e) => updateClientNumberField("protein_multiplier", e.target.value)}
               />
             </div>
             <div>
@@ -302,7 +316,7 @@ export default function GeneratePlanPage() {
                 type="number"
                 step="0.1"
                 value={client.fat_multiplier}
-                onChange={(e) => updateClientField("fat_multiplier", Number(e.target.value))}
+                onChange={(e) => updateClientNumberField("fat_multiplier", e.target.value)}
               />
             </div>
           </div>

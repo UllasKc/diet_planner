@@ -17,7 +17,7 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-brand">
-        <span className="brand-icon">🥗</span> Diet Planner
+        <span className="brand-icon">🥗</span> Sahana's Diet Planner
       </div>
       <nav className="navbar-links">
         <NavLink to="/generate" className={({ isActive }) => (isActive ? "active" : "")}>

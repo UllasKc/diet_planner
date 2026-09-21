@@ -578,7 +578,12 @@ function MacroInput({ label, value, onChange }) {
   return (
     <label className="macro-input">
       <span>{label}</span>
-      <input type="number" step="0.1" value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <input
+        type="number"
+        step="0.1"
+        value={value}
+        onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
+      />
     </label>
   );
 }

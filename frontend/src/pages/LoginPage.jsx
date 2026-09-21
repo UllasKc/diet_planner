@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="auth-shell">
       <form className="auth-card" onSubmit={handleSubmit}>
         <span className="auth-icon">🥗</span>
-        <h1>Diet Planner</h1>
+        <h1>Sahana's Diet Planner</h1>
         <p className="auth-subtitle">Indian nutrition, personalised for every client.</p>
 
         <label htmlFor="username">Username</label>
