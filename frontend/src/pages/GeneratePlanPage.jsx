@@ -73,8 +73,13 @@ export default function GeneratePlanPage() {
 
   function pruneSelections(prevSelections, availableOptions) {
     const next = {};
-    for (const slot of Object.keys(availableOptions)) {
+    // Iterate in the canonical breakfast->dinner order (not whatever order the
+    // backend's dict happens to be in) so selectionPayload — and therefore the
+    // generated plan's meal order — always comes out breakfast/snack/lunch/
+    // snack/dinner, regardless of how the API returns its keys.
+    for (const slot of Object.keys(MEAL_LABELS)) {
       const options = availableOptions[slot];
+      if (!options) continue;
       const availableKeys = new Set(options.map((o) => o.option_key));
       const kept = (prevSelections[slot] || []).filter((key) => availableKeys.has(key));
       // Default to the first option when nothing valid is selected yet (first load,
@@ -379,15 +384,6 @@ function PlanResult({ plan, onExport, exporting, choiceSelections, onToggleChoic
         <Stat label="Fat" value={`${nutrition.macros.fat_g} g`} tone="fat" />
       </div>
 
-      <div className="export-row">
-        <button className="btn btn-secondary" disabled={exporting === "docx"} onClick={() => onExport("docx")}>
-          {exporting === "docx" ? "Exporting..." : "⬇ Export DOCX"}
-        </button>
-        <button className="btn btn-secondary" disabled={exporting === "pdf"} onClick={() => onExport("pdf")}>
-          {exporting === "pdf" ? "Exporting..." : "⬇ Export PDF"}
-        </button>
-      </div>
-
       {meals.map((meal) => {
         const showHeading = meal.meal_slot !== lastSlot;
         lastSlot = meal.meal_slot;
@@ -472,6 +468,15 @@ function PlanResult({ plan, onExport, exporting, choiceSelections, onToggleChoic
           ))}
         </div>
       )}
+
+      <div className="export-row export-row-end">
+        <button className="btn btn-secondary" disabled={exporting === "docx"} onClick={() => onExport("docx")}>
+          {exporting === "docx" ? "Exporting..." : "⬇ Export DOCX"}
+        </button>
+        <button className="btn btn-secondary" disabled={exporting === "pdf"} onClick={() => onExport("pdf")}>
+          {exporting === "pdf" ? "Exporting..." : "⬇ Export PDF"}
+        </button>
+      </div>
     </div>
   );
 }

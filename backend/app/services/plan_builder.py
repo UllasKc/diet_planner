@@ -12,8 +12,15 @@ MEAL_SLOTS = list(MEAL_LABELS.keys())
 
 
 def list_meal_options(food_preference: str | None = None) -> dict[str, list[dict]]:
-    """Return {meal_slot: [{option_key, meal_name, base_calories, preference}, ...]}"""
-    result: dict[str, list[dict]] = {}
+    """Return {meal_slot: [{option_key, meal_name, base_calories, preference}, ...]}
+
+    Keys are built in MEAL_SLOTS order (breakfast -> dinner) rather than
+    however the database happens to return rows — otherwise dict key order
+    (and everything downstream that relies on it, like the generated plan's
+    meal order) ends up alphabetical by accident, putting dinner/evening
+    snack before lunch.
+    """
+    by_slot: dict[str, list[dict]] = {}
 
     with get_session() as session:
         records = session.query(MealOptionRecord).all()
@@ -21,7 +28,7 @@ def list_meal_options(food_preference: str | None = None) -> dict[str, list[dict
             if food_preference and record.preference not in (food_preference, "Universal"):
                 continue
 
-            result.setdefault(record.meal_slot, []).append(
+            by_slot.setdefault(record.meal_slot, []).append(
                 {
                     "option_key": record.option_key,
                     "meal_name": record.meal_name,
@@ -30,7 +37,7 @@ def list_meal_options(food_preference: str | None = None) -> dict[str, list[dict
                 }
             )
 
-    return result
+    return {slot: by_slot[slot] for slot in MEAL_SLOTS if slot in by_slot}
 
 
 def list_meal_options_full() -> dict[str, list[dict]]:

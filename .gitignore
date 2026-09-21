@@ -22,5 +22,8 @@ frontend/.vite/
 .DS_Store
 Thumbs.db
 
+# Claude Code local artifacts
+.claude/
+
 # Logs
 *.log
