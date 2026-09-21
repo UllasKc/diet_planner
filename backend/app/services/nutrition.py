@@ -116,6 +116,21 @@ def scale_meal(meal_data: dict, target_calories: float) -> dict:
     return scaled_meal
 
 
+def _adjust_meal_total(meal: dict, delta: int) -> None:
+    """Nudges one ingredient's calories by delta so the meal's total_calories
+    shifts by exactly delta, keeping ingredient-sum == total_calories intact."""
+    if delta == 0:
+        return
+    ingredients = list(meal.get("ingredients", {}).values())
+    candidates = [ing for ing in ingredients if not ing.get("is_fixed")] or ingredients
+    if not candidates:
+        return
+    largest = max(candidates, key=lambda ing: ing.get("calories", 0))
+    largest["calories"] = max(0, largest.get("calories", 0) + delta)
+    meal["total_calories"] = meal.get("total_calories", 0) + delta
+    meal["target_calories"] = meal.get("target_calories", 0) + delta
+
+
 def build_scaled_plan(selected_meals: list[dict], target_calories: float) -> list[dict]:
     """Distribute target_calories across the chosen meals, proportional to each
     meal's base_calories weight, then scale ingredient quantities accordingly."""
@@ -131,5 +146,17 @@ def build_scaled_plan(selected_meals: list[dict], target_calories: float) -> lis
         scaled_meal["meal_label"] = MEAL_LABELS.get(selected["meal_slot"], selected["meal_slot"].title())
         scaled_meal["option_key"] = selected["option_key"]
         scaled_meals.append(scaled_meal)
+
+    # Each meal's total was independently rounded to match its own fractional
+    # share of the day's target, so the day's sum can drift a kcal or two from
+    # the overall target even though every individual meal is internally
+    # exact. Nudge the largest meal to absorb the difference so the displayed
+    # daily total always matches the target exactly.
+    day_target = round(target_calories)
+    day_total = sum(m["total_calories"] for m in scaled_meals)
+    residual = day_target - day_total
+    if residual != 0 and scaled_meals:
+        largest_meal = max(scaled_meals, key=lambda m: m["total_calories"])
+        _adjust_meal_total(largest_meal, residual)
 
     return scaled_meals
