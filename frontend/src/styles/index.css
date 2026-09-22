@@ -420,6 +420,24 @@ textarea:focus {
   padding: 8px 10px;
 }
 
+.auth-switch {
+  margin-top: 18px;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
 /* Meal selection */
 .meal-slot-group {
   margin-top: 18px;

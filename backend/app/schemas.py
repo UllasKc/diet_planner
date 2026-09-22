@@ -13,6 +13,16 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    """Public self-registration — always creates a 'viewer' (client) account.
+    There's no role field here on purpose: admin accounts are never created
+    through this endpoint, only by an existing admin via the backend."""
+
+    username: str = Field(min_length=3, max_length=64, pattern=r"^[a-zA-Z0-9_.]+$")
+    password: str = Field(min_length=6, max_length=128)
+    display_name: str = Field(min_length=1, max_length=120)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
